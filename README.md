@@ -2,6 +2,8 @@
 
 A standalone [Model Context Protocol](https://modelcontextprotocol.io/) server for ONOS-managed networks, plus a JSON-driven Mininet topology launcher. The server discovers hosts, switches, and links from ONOS at call time, so it is not tied to a fixed topology.
 
+![Example call using the MCP](/images/example_mcp_use.png)
+
 It supports:
 
 - **stdio** for desktop MCP clients;
