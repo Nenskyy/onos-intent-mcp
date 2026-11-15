@@ -1,0 +1,197 @@
+# ONOS MCP Server
+
+A standalone [Model Context Protocol](https://modelcontextprotocol.io/) server for ONOS-managed networks, plus a JSON-driven Mininet topology launcher. The server discovers hosts, switches, and links from ONOS at call time, so it is not tied to a fixed topology.
+
+It supports:
+
+- **stdio** for desktop MCP clients;
+- **Streamable HTTP** for browser clients such as the llama.cpp Web UI;
+- host-to-host intents, connectivity checks, and direct link up/down.
+
+The repository contains both the MCP server and the topology launcher.
+
+## Quick start
+
+```bash
+uv sync
+cp .env.example .env
+# edit .env: ONOS_URL, credentials, and optional ONOS_CONTROL_URL
+uv run main.py --selftest
+```
+
+For a browser client, set `ONOS_HTTP=1` in `.env`, for a stdio client, set `ONOS_HTTP=0` and run:
+
+```bash
+uv run main.py
+```
+
+The MCP endpoint is `http://127.0.0.1:8000/mcp`; health is at
+`http://127.0.0.1:8000/health`.
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Without `ONOS_HTTP=1` or `--http`, the server waits for JSON-RPC on stdin and does not open a port.
+
+## Requirements
+
+- Linux or macOS with [`uv`](https://docs.astral.sh/uv/).
+- Python 3.12+ managed by `uv`.
+- ONOS northbound REST, usually `http://<onos-host>:8181`.
+- Optional control API:
+  - The topology control API, usually `http://<topology-host>:9090`.
+  - Mininet on the machine running `topology/start_topo.py`.
+
+The MCP server does not start ONOS or the topology. If you only need discovery and host intents, the control API is optional.
+
+## Tools
+
+| Tool | Purpose |
+|---|---|
+| `get_network_context` | Hosts, switches, links, aliases, intents, flows, and control health. Call first. |
+| `list_hosts` | Hosts discovered by ONOS. |
+| `list_intents` | Active host-to-host intents, optionally including withdrawn ones. |
+| `list_flows` | Priority-100 intent flows grouped by switch. |
+| `create_intent` | Create a host-to-host intent and wait for `INSTALLED`. |
+| `remove_intent` | Remove the intent matching two hosts. |
+| `connect_nodes` | Connect hosts with an intent, or bring a switch/host-switch link up. |
+| `disconnect_nodes` | Remove a host intent, or bring a switch/host-switch link down. |
+| `check_connectivity` | Ping one host from another through the control API. |
+| `set_link` | Bring any direct link up or down through the control API. |
+
+Resources use the `onos://` scheme. Additional reference material is in [`MCP_SERVER.md`](MCP_SERVER.md).
+
+## Host and switch names
+
+Names are resolved against live ONOS inventory:
+
+- hosts become `h<last IPv4 octet>` when unique, for example `h5` for `10.20.0.5`;
+- switches become `s<hex datapath number>` when unique, for example `s5` for `of:0000000000000005`;
+- IPs, MACs, full ONOS host IDs, and full device IDs also work.
+
+For different names, use aliases:
+
+```bash
+uv run main.py \
+  --host-alias h5=10.20.0.5 \
+  --switch-alias edge=of:0000000000000005
+```
+
+Or set `ONOS_HOST_ALIASES` and `ONOS_SWITCH_ALIASES` in `.env`.
+
+## ONOS and the control API
+
+The server uses two independent endpoints, both interpreted from the machine where the MCP server runs:
+
+| Setting | Endpoint | Needed for |
+|---|---|---|
+| `ONOS_URL` | ONOS REST, usually port 8181 | Discovery, intents, flows |
+| `ONOS_CONTROL_URL` | Mininet control API, usually port 9090 | Pings, link changes, switch/host-switch connect |
+
+The MCP server does not SSH into the VM. For a ping or link change it sends JSON to the control API, which runs the operation inside Mininet.
+
+If ONOS runs in a VM and the MCP server runs on the host, forward ports 8181 and 9090 and bind the control API to `0.0.0.0`. If the MCP server runs inside the VM, use `127.0.0.1` for both.
+
+Without `ONOS_CONTROL_URL`, these fail with an explanatory error:
+`check_connectivity`, `set_link`, and switch/host-switch `connect_nodes`/`disconnect_nodes`. Host-to-host intents still work.
+
+## Mininet topology launcher
+
+`topology/` is separate from the MCP package. It starts a topology from JSON, connects its switches to ONOS, and optionally starts the control API.
+
+```bash
+cd topology
+sudo python3 start_topo.py \
+  --topology example.json \
+  --controller-ip 127.0.0.1 \
+  --controller-port 6653 \
+  --control-host 0.0.0.0 \
+  --control-port 9090
+```
+
+Use `--clean` to run `mn -c` first, `--hold N` to run without the interactive CLI, and `--control-port 0` to disable the control API. Stop with Ctrl-C so Mininet can clean its interfaces.
+
+See [`topology/README.md`](topology/README.md) for the JSON schema and [`topology/example.json`](topology/example.json) for a complete example.
+
+## Configuration
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `ONOS_URL` | `http://127.0.0.1:8181` | ONOS northbound URL |
+| `ONOS_USER` | `onos` | ONOS REST username |
+| `ONOS_PASSWORD` | `rocks` | ONOS REST password |
+| `ONOS_APP_ID` | `org.onosproject.cli` | Intent application ID |
+| `ONOS_CONTROL_URL` | empty | Mininet control API URL; empty disables it |
+| `ONOS_HOST_ALIASES` | empty | Host aliases, `name=IP/MAC/ID,...` |
+| `ONOS_SWITCH_ALIASES` | empty | Switch aliases, `name=device-ID,...` |
+| `ONOS_HTTP` | off | Set to `1` to start Streamable HTTP |
+| `ONOS_HTTP_HOST` | `127.0.0.1` | HTTP bind address |
+| `ONOS_HTTP_PORT` | `8000` | HTTP port |
+| `ONOS_HTTP_PATH` | `/mcp` | Streamable HTTP path |
+| `ONOS_CORS_ORIGINS` | `*` | Comma-separated allowed CORS origins |
+| `ONOS_ENV_FILE` | empty | Explicit env file; `.env` is automatic |
+
+`.env` is loaded from the current directory or project root. Existing shell variables take precedence. Use `--env-file PATH` or `ONOS_ENV_FILE` for a different file. Equivalent flags include `--onos-url`, `--onos-user`, `--onos-password`, `--app-id`, `--control-url`, `--http`, `--http-host`, `--http-port`, `--http-path`, and `--cors-origin`.
+
+## MCP client configuration
+
+Stdio:
+
+```json
+{
+  "mcpServers": {
+    "onos": {
+      "command": "uv",
+      "args": ["run", "--directory", "<project-root>", "main.py"],
+      "env": {
+        "ONOS_URL": "http://<onos-host>:8181",
+        "ONOS_USER": "onos",
+        "ONOS_PASSWORD": "rocks",
+        "ONOS_APP_ID": "org.onosproject.cli",
+        "ONOS_CONTROL_URL": "http://<topology-host>:9090"
+      }
+    }
+  }
+}
+```
+
+HTTP browser client: start the server with `ONOS_HTTP=1` or `--http`, then add the Streamable HTTP URL:
+
+```text
+http://<mcp-server-host>:8000/mcp
+```
+
+Use `/mcp`, not `/sse`. If the browser runs on another machine, bind `--http-host 0.0.0.0` and allow the port through the firewall.
+
+## Testing
+
+```bash
+uv run python -m unittest -v \
+  tests.test_topology_config \
+  tests.test_topology_control \
+  tests.test_http_transport \
+  tests.test_mcp_server \
+  tests.test_intent_tools
+```
+
+Expected: 39 tests, with the live ONOS test skipped unless `ONOS_LIVE=1`.
+
+```bash
+ONOS_LIVE=1 uv run python -m unittest -v tests.test_intent_tools
+```
+
+## Troubleshooting
+
+- **`uv run main.py` prints nothing**: it is in stdio mode, waiting on stdin. Set `ONOS_HTTP=1` or use `--http`.
+- **Browser `NetworkError` or `Disallowed CORS origin`**: set `ONOS_CORS_ORIGINS=*` or the exact Web UI origin, then restart the server.
+- **No hosts**: ONOS has not discovered them yet. Generate traffic and call `get_network_context` again.
+- **Control disabled**: set `ONOS_CONTROL_URL` and restart the MCP server.
+- **Control API connection refused**: confirm the topology is running and the port is reachable from the MCP server.
+
+## Security
+
+- The HTTP MCP endpoint has no authentication. Bind `127.0.0.1` unless a remote client needs it; otherwise use a firewall or a TLS reverse proxy.
+- The control API also has no authentication. Do not expose it to an untrusted network.
+- Keep `.env` private; it is ignored by git.
+- Change the default ONOS credentials if your controller uses different ones.

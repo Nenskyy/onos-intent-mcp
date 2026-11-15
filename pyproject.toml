@@ -1,0 +1,21 @@
+[project]
+name = "onos-intent-mcp"
+version = "1.0.0"
+description = "MCP server and Mininet topology launcher for ONOS-managed networks"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2.3,<3",
+    "starlette>=0.48",
+    "uvicorn>=0.31.1",
+]
+
+[project.scripts]
+onos-mcp = "onos_mcp.server:main"
+onos-mcp-stdlib = "onos_mcp.stdlib_server:main"
+
+[build-system]
+requires = ["uv_build>=0.10.7,<0.11.0"]
+build-backend = "uv_build"
