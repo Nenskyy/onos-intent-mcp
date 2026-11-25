@@ -1,0 +1,71 @@
+HOSPITAL NETWORK AND HOST-ROLE DIRECTORY
+
+Scope: simulated hospital network managed by ONOS.
+This directory identifies endpoints; connectivity permissions are specified in
+hospital-01-connectivity-rules. There are no real patients or clinical devices.
+
+HOST DIRECTORY
+
+Node: nurse
+Role: nurse station
+IPv4: 10.20.0.1
+MAC: 00:00:00:00:20:01
+Switch attachment: s1
+
+Node: doctor
+Role: doctor workstation
+IPv4: 10.20.0.2
+MAC: 00:00:00:00:20:02
+Switch attachment: s1
+
+Node: patient
+Role: patient monitor; simulated source of patient measurements
+IPv4: 10.20.0.3
+MAC: 00:00:00:00:20:03
+Switch attachment: s1
+
+Node: monitor
+Role: monitoring server
+IPv4: 10.20.0.4
+MAC: 00:00:00:00:20:04
+Switch attachment: s2
+
+Node: alert
+Role: alert service; alert server
+IPv4: 10.20.0.5
+MAC: 00:00:00:00:20:05
+Switch attachment: s2
+
+Node: adminpc
+Role: administrative workstation
+IPv4: 10.20.0.6
+MAC: 00:00:00:00:20:06
+Switch attachment: s3
+
+Node: adminsrv
+Role: administrative server; admin server
+IPv4: 10.20.0.7
+MAC: 00:00:00:00:20:07
+Switch attachment: s3
+
+Node: guest
+Role: guest workstation
+IPv4: 10.20.0.8
+MAC: 00:00:00:00:20:08
+Switch attachment: s3
+
+INFRASTRUCTURE AND INTERPRETATION
+
+All hosts use the 10.20.0.0/24 subnet. Switch links are s1-s2 and s2-s3.
+Physical links and shared addressing do not grant permission to communicate.
+Use the exact node names above when a tool requires Mininet node names.
+Role descriptions refer to these nodes; no other endpoint is implied.
+The word "server" alone does not uniquely identify an endpoint. There is no
+default server or destination for an unspecified request.
+No public Internet service, Wikipedia endpoint or Netflix endpoint is defined
+by this hospital directory.
+
+The directory describes intended identities, not current operational state.
+Measure current connectivity rather than assuming it matches policy.
+Ping tests demonstrate network reachability, not clinical measurement delivery,
+alert application functionality, storage health or clinical safety.

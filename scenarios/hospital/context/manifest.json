@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "id": "hospital-01-scenario-brief",
+      "title": "Hospital network and host-role directory",
+      "file": "documents/hospital-01-scenario-brief.txt",
+      "scenario_ids": ["Hospital-01"],
+      "category": "supplied_context",
+      "sensitivity": "internal",
+      "authority": "authoritative_scenario"
+    },
+    {
+      "id": "hospital-01-connectivity-rules",
+      "title": "Hospital connectivity requirements and restrictions",
+      "file": "documents/hospital-01-connectivity-rules.txt",
+      "scenario_ids": ["Hospital-01"],
+      "category": "supplied_context",
+      "sensitivity": "internal",
+      "authority": "approved_rules"
+    }
+  ]
+}

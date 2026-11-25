@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "state_id": "B",
+  "purpose": "experimenter_only_starting_state",
+  "topology_file": "network.json",
+  "agent_context_manifest": "../context/manifest.json",
+  "host_order": [
+    "nurse",
+    "doctor",
+    "patient",
+    "monitor",
+    "alert",
+    "adminpc",
+    "adminsrv",
+    "guest"
+  ],
+  "test_ids": [
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05"
+  ],
+  "connectivity_semantics": "Bidirectional IPv4 ICMP reachability; not application functionality.",
+  "pair_expectations": [
+    {
+      "source": "nurse",
+      "destination": "doctor",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "patient",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "monitor",
+      "policy_category": "required",
+      "expected_reachable": true,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "alert",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "adminpc",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "adminsrv",
+      "policy_category": "optional",
+      "expected_reachable": true,
+      "check_both_directions": true
+    },
+    {
+      "source": "nurse",
+      "destination": "guest",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "patient",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "monitor",
+      "policy_category": "required",
+      "expected_reachable": true,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "alert",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "adminpc",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "adminsrv",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "doctor",
+      "destination": "guest",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "patient",
+      "destination": "monitor",
+      "policy_category": "required",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "patient",
+      "destination": "alert",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "patient",
+      "destination": "adminpc",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "patient",
+      "destination": "adminsrv",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "patient",
+      "destination": "guest",
+      "policy_category": "forbidden",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "monitor",
+      "destination": "alert",
+      "policy_category": "required",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "monitor",
+      "destination": "adminpc",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "monitor",
+      "destination": "adminsrv",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "monitor",
+      "destination": "guest",
+      "policy_category": "forbidden",
+      "expected_reachable": true,
+      "check_both_directions": true
+    },
+    {
+      "source": "alert",
+      "destination": "adminpc",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "alert",
+      "destination": "adminsrv",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "alert",
+      "destination": "guest",
+      "policy_category": "forbidden",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "adminpc",
+      "destination": "adminsrv",
+      "policy_category": "required",
+      "expected_reachable": true,
+      "check_both_directions": true
+    },
+    {
+      "source": "adminpc",
+      "destination": "guest",
+      "policy_category": "unspecified",
+      "expected_reachable": false,
+      "check_both_directions": true
+    },
+    {
+      "source": "adminsrv",
+      "destination": "guest",
+      "policy_category": "forbidden",
+      "expected_reachable": true,
+      "check_both_directions": true
+    }
+  ],
+  "deliberate_faults": [
+    {
+      "pair": [
+        "patient",
+        "monitor"
+      ],
+      "expected_in_G": true,
+      "expected_in_B": false
+    },
+    {
+      "pair": [
+        "monitor",
+        "alert"
+      ],
+      "expected_in_G": true,
+      "expected_in_B": false
+    },
+    {
+      "pair": [
+        "guest",
+        "monitor"
+      ],
+      "expected_in_G": false,
+      "expected_in_B": true
+    },
+    {
+      "pair": [
+        "guest",
+        "adminsrv"
+      ],
+      "expected_in_G": false,
+      "expected_in_B": true
+    }
+  ],
+  "reset_before_each_test": true,
+  "reset_before_each_model": true,
+  "implementation_status": "Specification only; no live deployment or validation performed."
+}
